@@ -1,0 +1,26 @@
+{
+    "Proxy 1": {
+        "name": "Proxy 1",
+        "proxyType": "HttpProxy",
+        "host": "",
+        "port": 0,
+        "user": "",
+        "password": "",
+        "noProxy": [
+            "localhost",
+            "127.0.0.1"
+        ]
+    },
+    "Proxy 2": {
+        "name": "Proxy 2",
+        "proxyType": "HttpProxy",
+        "host": "",
+        "port": 0,
+        "user": "",
+        "password": "",
+        "noProxy": [
+            "localhost",
+            "127.0.0.1"
+        ]
+    }
+}
