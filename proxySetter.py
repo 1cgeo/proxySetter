@@ -30,7 +30,7 @@ class ProxySetter:
         self.coordinates = []
         # self.toolbar = self.iface.addToolBar(u"Proxy settings")
         self.comboBox = QComboBox()
-        self.iface.addToolBarWidget(self.comboBox)
+        self.comboBoxAction = self.iface.addToolBarWidget(self.comboBox)
         self.comboBox.addItems([option for option in self.config])
 
         self.comboBox.activated[str].connect(self.handler)
@@ -80,8 +80,7 @@ class ProxySetter:
         self.s.sync()
 
     def updateUnknown(self, text):
-        print('oui!!!')
-        self.config[text]['user'] = self.widget.password.text()
+        self.config[text]['user'] = self.widget.username.text()
         self.config[text]['password'] = base64.b64encode(
             bytes(self.widget.password.text(), 'utf-8')).decode('utf-8')
         self.handler(text)
@@ -89,7 +88,8 @@ class ProxySetter:
             json.dump(self.config, f)
 
     def unload(self):
-        pass
+        self.iface.removeToolBarIcon(self.comboBoxAction)
+        del self.comboBox
 
     def modifyProxy(self, text):
         # After setting the proxy it could be necessary to update active connection. See QGSAuthMethod / QgsAuthManager
