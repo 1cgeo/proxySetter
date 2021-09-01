@@ -3,6 +3,7 @@ from qgis.core import QgsSettings, QgsNetworkAccessManager
 from factories.widgetFactory import WidgetFactory
 import json
 import os
+import base64
 
 class ProxyCtrl:
 
@@ -31,10 +32,12 @@ class ProxyCtrl:
         return option
 
     def saveProxyOption(self, proxyName, option):
-        with open(self.PROXY_CONFIG_FILE, 'w', encoding='utf-8') as f:
+        data = {}
+        with open(self.PROXY_CONFIG_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
+        with open(self.PROXY_CONFIG_FILE, 'w', encoding='utf-8') as f:
             data[ proxyName ] = option
-            f.write( data )
+            json.dump(data, f)
 
     def getProxyComboWidget(self):
         proxyComboBox = self.widgetFactory.createWidget( 'ProxyComboBox' )
@@ -46,9 +49,11 @@ class ProxyCtrl:
         proxyDialog = self.widgetFactory.createWidget( 'ProxyDialog' )
         return proxyDialog
 
-    def encodeB64(self, text):
-        temp = base64.b64decode(bytes(text['password'], 'utf-8'))
-        return temp.decode('utf-8')
+    def encryptNetworkPassword(self, text):
+        return base64.b64encode(bytes(text, 'utf-8')).decode('utf-8')
+    
+    def decryptNetworkPassword(self, text):
+        return base64.b64decode(text).decode('utf-8')
 
     def changeNetworkProxy(self, proxyName):
         option = self.getProxyOption( proxyName )
@@ -57,11 +62,20 @@ class ProxyCtrl:
             if proxyDialog.showCustom():
                 inputData = proxyDialog.getData()
                 option['user'] = inputData['user']
-                option['password'] = self.encodeB64( inputData['password'] )
+                option['password'] = self.formatNetworkPassword( inputData['password'] )
                 self.saveProxyOption( proxyName, option )
         self.setCurrentNetworkProxy( option )
 
     def setCurrentNetworkProxy(self, option):
+        s = QgsSettings()
+        s.setValue('proxy/proxyEnabled', 'true')
+        s.setValue('proxy/proxyHost', option['host'])
+        s.setValue('proxy/proxyPort', option['port'])
+        s.setValue('proxy/proxyUser', option['user'])
+        s.setValue('proxy/proxyPassword', self.decryptNetworkPassword( option['password'] ))
+        s.setValue('proxy/proxyType', option['proxyType'])
+        s.setValue('proxy/noProxyUrls', option['noProxy'])
+        s.sync()
         proxy = QNetworkProxy(
             QNetworkProxy.HttpProxy,
             hostName = option['host'],
@@ -71,3 +85,5 @@ class ProxyCtrl:
         )
         QNetworkProxy.setApplicationProxy( proxy )
         QgsNetworkAccessManager.instance().setFallbackProxyAndExcludes( proxy, [], option['noProxy'] )
+
+        
