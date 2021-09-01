@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
+from .main import Main
 
-def classFactory(iface):  # pylint: disable=invalid-name
-    from .proxySetter import ProxySetter
-    return ProxySetter(iface)
+def classFactory(iface):
+    return Main(iface)
