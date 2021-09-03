@@ -1,6 +1,6 @@
 from qgis.PyQt.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from qgis.core import QgsSettings, QgsNetworkAccessManager
-from factories.widgetFactory import WidgetFactory
+from proxySetter.factories.widgetFactory import WidgetFactory
 import json
 import os
 import base64
